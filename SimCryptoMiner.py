@@ -8,10 +8,10 @@ Sichere Lehrsimulation eines "miner-like" Prozesses:
 - 100% harmlos: keine Persistenz, keine Rechteänderungen, keine Netzwerkverbindungen
 
 Usage (Windows):
-    python sim_miner.py --workers 4 --duration 120 --mem-mb 200 --killfile C:\temp\sim_kill.flag
+    python sim_miner.py --workers 4 --duration 120 --mem-mb 200 --killfile C:\temp\\sim_kill.flag
 
 Stoppen:
-    - lege die Datei an (z. B. `echo stop > C:\temp\sim_kill.flag`) oder CTRL+C
+    - lege die Datei an (z. B. `echo stop > C:\temp\\sim_kill.flag`) oder CTRL+C
     - oder: taskkill /IM python.exe /F  (falls mehrere Python-Prozesse laufen: erst PID prüfen)
 """
 
