@@ -39,11 +39,6 @@ def cpu_worker(stop_event, worker_id):
         # gelegentlich kurz schlafen, um die Last steuerbar zu machen
         if local_counter % 10 == 0:
             time.sleep(0.01)
-        # periodische Statusausgabe vom Worker (nur in main Prozess sinnvoll)
-        if time.time() - last_report > 5:
-            # nur minimaler stdout-Ausstoß, damit CPU-Last nicht durch Logging beeinflusst wird
-            print(f"[Worker {worker_id}] Schleifen: {local_counter}")
-            last_report = time.time()
 
 def mem_alloc_worker(stop_event, mb):
     """Allokiert kurzzeitig einen Bytearray in der gegebenen Größe (MB)."""
@@ -59,9 +54,8 @@ def mem_alloc_worker(stop_event, mb):
             time.sleep(0.1)
         if remainder and not stop_event.is_set():
             allocated.append(bytearray(remainder * 1024 * 1024))
-        # Halte den Speicher für ein paar Sekunden (oder bis Stop)
-        hold_seconds = 10
-        for _ in range(hold_seconds):
+        # Halte den Speicher bis Stop durch CTRL+C oder Killfile
+        while True:
             if stop_event.is_set():
                 break
             time.sleep(1)
@@ -75,7 +69,6 @@ def monitor_killfile(stop_event, killfile_path):
         return
     while not stop_event.is_set():
         if os.path.exists(killfile_path):
-            print(f"Killfile gefunden: {killfile_path} -> Beende Simulation.")
             stop_event.set()
             break
         time.sleep(1)
@@ -88,7 +81,6 @@ def main():
     parser.add_argument("--killfile", type=str, default="", help="Pfad zu einer Kill-Datei; Existenz führt zum Stop.")
     args = parser.parse_args()
 
-    print("=== sim_miner (Lehrsimulation) ===")
     print(f"Workers: {args.workers}, Duration: {args.duration}s, Mem: {args.mem_mb}MB, Killfile: '{args.killfile}'")
     stop_event = mp.Event()
 
@@ -111,7 +103,6 @@ def main():
         while True:
             elapsed = time.time() - start
             if args.duration > 0 and elapsed >= args.duration:
-                print("Dauer abgelaufen -> beende Simulation.")
                 stop_event.set()
                 break
             if stop_event.is_set():
