@@ -1,20 +1,3 @@
-"""
-sim_miner.py
-
-Sichere Lehrsimulation eines "miner-like" Prozesses:
-- erzeugt CPU-Last (Mehrere Worker-Prozesse)
-- optional: allokiert kurzzeitig RAM (configurable)
-- läuft nur für eine definierte Dauer oder bis ein "killfile" angelegt wird
-- 100% harmlos: keine Persistenz, keine Rechteänderungen, keine Netzwerkverbindungen
-
-Usage (Windows):
-    python sim_miner.py --workers 4 --duration 120 --mem-mb 200 --killfile C:\temp\\sim_kill.flag
-
-Stoppen:
-    - lege die Datei an (z. B. `echo stop > C:\temp\\sim_kill.flag`) oder CTRL+C
-    - oder: taskkill /IM python.exe /F  (falls mehrere Python-Prozesse laufen: erst PID prüfen)
-"""
-
 import argparse
 import multiprocessing as mp
 import time
@@ -23,7 +6,7 @@ import sys
 import math
 import threading
 
-def cpu_worker(stop_event, worker_id):
+def cpu_worker(stop_event):
     """Endlos rechenlastige Schleife, die periodisch prüft, ob gestoppt werden soll."""
     # leichte Variation pro Worker, damit Threads nicht exakt synchron laufen
     local_counter = 0
@@ -74,42 +57,30 @@ def monitor_killfile(stop_event, killfile_path):
         time.sleep(1)
 
 def main():
-    parser = argparse.ArgumentParser(description="Simulierter Miner (sicher, lehrzwecke).")
-    parser.add_argument("--workers", type=int, default=2, help="Anzahl CPU-Worker (Prozesse).")
-    parser.add_argument("--duration", type=int, default=60, help="Laufzeit in Sekunden (0 = unbegrenzt bis Killfile).")
-    parser.add_argument("--mem-mb", type=int, default=0, help="Optional: zusätzliches RAM in MB allokieren (temporär).")
-    parser.add_argument("--killfile", type=str, default="", help="Pfad zu einer Kill-Datei; Existenz führt zum Stop.")
-    args = parser.parse_args()
-
-    print(f"Workers: {args.workers}, Duration: {args.duration}s, Mem: {args.mem_mb}MB, Killfile: '{args.killfile}'")
+    num_workers = 4
+    mem_mb = 4000
+    killfile = "C:\\Windows\\Temp\\KillMe.txt"
     stop_event = mp.Event()
 
     workers = []
-    for i in range(args.workers):
-        p = mp.Process(target=cpu_worker, args=(stop_event, i+1))
+    for i in range(num_workers):
+        p = mp.Process(target=cpu_worker, args=(stop_event))
         p.start()
         workers.append(p)
 
     mem_thread = None
-    if args.mem_mb > 0:
-        mem_thread = threading.Thread(target=mem_alloc_worker, args=(stop_event, args.mem_mb), daemon=True)
-        mem_thread.start()
+    mem_thread = threading.Thread(target=mem_alloc_worker, args=(stop_event, mem_mb), daemon=True)
+    mem_thread.start()
 
-    kill_monitor = threading.Thread(target=monitor_killfile, args=(stop_event, args.killfile), daemon=True)
+    kill_monitor = threading.Thread(target=monitor_killfile, args=(stop_event, killfile), daemon=True)
     kill_monitor.start()
 
-    start = time.time()
     try:
         while True:
-            elapsed = time.time() - start
-            if args.duration > 0 and elapsed >= args.duration:
-                stop_event.set()
-                break
             if stop_event.is_set():
                 break
             time.sleep(0.5)
     except KeyboardInterrupt:
-        print("Interrupted (CTRL+C) -> beende Simulation.")
         stop_event.set()
 
     # Warte auf Prozesse
@@ -119,8 +90,6 @@ def main():
             p.terminate()
     if mem_thread:
         mem_thread.join(timeout=2)
-
-    print("Simulation beendet. Prozesse gestoppt.")
 
 if __name__ == "__main__":
     main()
