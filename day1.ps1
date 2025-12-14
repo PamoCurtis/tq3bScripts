@@ -68,7 +68,7 @@ if ($member) {
 # 3. Ordner erstellen falls nicht vorhanden
 ###############################################################################
 if (!(Test-Path $Directory)) {
-    Write-Host "Zielordner existiert nicht – wird erstellt: $Directory"
+    Write-Host "Zielordner existiert nicht - wird erstellt: $Directory"
     New-Item -ItemType Directory -Path $Directory -Force | Out-Null
 }
 
