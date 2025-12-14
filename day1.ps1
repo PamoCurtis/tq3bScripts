@@ -22,7 +22,7 @@ param (
     [string]$Directory,
 
     [Parameter(Mandatory = $false)]
-    [string]$Repo,
+    [string]$Repo
 )
 
 ###############################################################################
