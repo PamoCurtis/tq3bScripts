@@ -73,7 +73,7 @@ if (!(Test-Path $Directory)) {
 }
 
 ###############################################################################
-# 4. Repo herunterladen
+# 4. Repo herunterladen und entpacken
 ###############################################################################
 if(![string]::IsNullOrWhiteSpace($Repo)) {
     $tempZip = "$env:TEMP\repo.zip"
@@ -85,20 +85,17 @@ if(![string]::IsNullOrWhiteSpace($Repo)) {
         Write-Host "FEHLER: Download der ZIP fehlgeschlagen!" -ForegroundColor Red
         exit 1
     }
+    
+    try {
+        Write-Host "Entpacke Repository nach $Directory ..."
+        Expand-Archive -Path $tempZip -DestinationPath $Directory -Force
+    } catch {
+        Write-Host "FEHLER: Entpacken fehlgeschlagen – fahre dennoch fort." -ForegroundColor Yellow
+    }
+
+    Remove-Item $tempZip -Force
+
 }
-
-###############################################################################
-# 5. Repository entpacken
-###############################################################################
-try {
-    Write-Host "Entpacke Repository nach $Directory ..."
-    Expand-Archive -Path $tempZip -DestinationPath $Directory -Force
-} catch {
-    Write-Host "FEHLER: Entpacken fehlgeschlagen – fahre dennoch fort." -ForegroundColor Yellow
-}
-
-Remove-Item $tempZip -Force
-
 ###############################################################################
 # 6. NTFS-Zugriff verweigern
 ###############################################################################
