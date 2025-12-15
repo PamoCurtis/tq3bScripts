@@ -6,7 +6,7 @@ import sys
 import math
 import threading
 
-def cpu_worker(stop_event):
+def cpu_worker(stop_event, worker_id):
     """Endlos rechenlastige Schleife, die periodisch prüft, ob gestoppt werden soll."""
     # leichte Variation pro Worker, damit Threads nicht exakt synchron laufen
     local_counter = 0
@@ -64,7 +64,7 @@ def main():
 
     workers = []
     for i in range(num_workers):
-        p = mp.Process(target=cpu_worker, args=(stop_event))
+        p = mp.Process(target=cpu_worker, args=(stop_event, i+1))
         p.start()
         workers.append(p)
 
