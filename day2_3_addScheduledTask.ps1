@@ -2,12 +2,12 @@
 
 param (
     [Parameter(Mandatory = $true)]
-    [string]$User,
+    [string]$User
 )
 
 $action = New-ScheduledTaskAction `
     -Execute "cmd.exe" `
-    -Argument "/c `"C:\Users\administator\desktop\chrome.cmd`""
+    -Argument "/c `"C:\Users\administator\Desktop\chrome.cmd`""
 
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User "$User"
 
