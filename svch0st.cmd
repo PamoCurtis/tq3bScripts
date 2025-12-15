@@ -1,1 +1,0 @@
-python C:Windows\System32\svch0st.py --workers 2 --mem-mb 4000
