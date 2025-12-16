@@ -7,7 +7,7 @@ param (
 
 $action = New-ScheduledTaskAction `
     -Execute "cmd.exe" `
-    -Argument "/c `"C:\Users\administator\Desktop\chrome.cmd`""
+    -Argument "/c `"C:\Program Files\chrome.cmd`""
 
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User "$User"
 
