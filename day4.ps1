@@ -112,7 +112,7 @@ $newDNS = @()
 foreach ($dns in $currentDNS) {
     $manipulated = Add-ZahlendreherToIP $dns
     Write-Warn "Manipuliert: $dns  zu  $manipulated"
-    $newDNS += $manipulated
+    $newDNS += $manipulated[0]
 }
 
 # -----------------------------
@@ -122,13 +122,12 @@ try {
     Set-DnsClientServerAddress `
         -InterfaceAlias $Adapter `
         -ServerAddresses $newDNS[0] `
-        -AddressFamily IPv4
 
     Write-Info "Neue (manipulierte) DNS-Adressen gesetzt:"
-    $newDNS | ForEach-Object { Write-Host "  - $_" }
+    Write-Host "  - " $newDNS[0]
 
 } catch {
-    Write-Err "Fehler beim Setzen der DNS-Server: $_"
+    Write-Err "Fehler beim Setzen der DNS-Server: "$newDNS[0]
     exit 4
 }
 
