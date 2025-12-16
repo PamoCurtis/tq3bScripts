@@ -111,7 +111,7 @@ $newDNS = @()
 
 foreach ($dns in $currentDNS) {
     $manipulated = Add-ZahlendreherToIP $dns
-    Write-Warn "Manipuliert: $dns  →  $manipulated"
+    Write-Warn "Manipuliert: $dns  zu  $manipulated"
     $newDNS += $manipulated
 }
 
