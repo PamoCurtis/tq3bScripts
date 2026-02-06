@@ -1,7 +1,3 @@
-param(
-    [string] $Adapter
-)
-
 function Write-Info($msg){ Write-Host "[*] $msg" -ForegroundColor Cyan }
 function Write-Warn($msg){ Write-Host "[!] $msg" -ForegroundColor Yellow }
 function Write-Err($msg){ Write-Host "[X] $msg" -ForegroundColor Red }
@@ -20,42 +16,7 @@ if (-not (Test-IsAdmin)) {
     exit 1
 }
 
-# -----------------------------
-# Adapter auslesen
-# -----------------------------
-function Get-Adapters {
-    Get-DnsClientServerAddress -AddressFamily IPv4 |
-        Select-Object InterfaceAlias, ServerAddresses
-}
-
-function Choose-Adapter {
-    $adapters = Get-Adapters
-
-    Write-Info "Gefundene Netzwerkadapter (IPv4-DNS):"
-    for ($i = 0; $i -lt $adapters.Count; $i++) {
-        $alias = $adapters[$i].InterfaceAlias
-        $servers = $adapters[$i].ServerAddresses -join ", "
-        Write-Host "  [$($i+1)] $alias  → DNS: $servers"
-    }
-
-    $choice = Read-Host "Gib die Nummer des Adapters ein (oder Enter für 1)"
-
-    if ([string]::IsNullOrWhiteSpace($choice)) {
-        return $adapters[0].InterfaceAlias
-    }
-
-    $idx = [int]$choice - 1
-    if ($idx -lt 0 -or $idx -ge $adapters.Count) {
-        Write-Err "Ungültige Auswahl."
-        exit 2
-    }
-
-    return $adapters[$idx].InterfaceAlias
-}
-
-if ([string]::IsNullOrWhiteSpace($Adapter)) {
-    $Adapter = Choose-Adapter
-}
+$Adapter = "Ethernet"
 
 Write-Info "Adapter ausgewählt: $Adapter"
 
@@ -112,7 +73,7 @@ $newDNS = @()
 foreach ($dns in $currentDNS) {
     $manipulated = Add-ZahlendreherToIP $dns
     Write-Warn "Manipuliert: $dns  zu  $manipulated"
-    $newDNS += $manipulated[0]
+    $newDNS += $manipulated
 }
 
 # -----------------------------
